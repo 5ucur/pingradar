@@ -57,7 +57,7 @@ class PingManager:
 				self.info[ip]["render"] = time.time()
 
 	def renderIps(self):
-		render_time = 3 #secs
+		render_time = 4 #secs max 5 (main line rotating speed)
 		for ip in copy(self.info):
 			if not "render" in self.info[ip]:
 				continue
