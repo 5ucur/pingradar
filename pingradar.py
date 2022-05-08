@@ -48,22 +48,18 @@ class PingManager:
 
 	def drawIps(self, angle):
 		for ip in self.info:
-			if angle > self.info[ip]["angle"] and \
+			if angle >= self.info[ip]["angle"] and \
 			angle < self.info[ip]["angle"] + 2:
 				if self.info[ip]["render_ms"]:
 					p_r = self.info[ip]["render_ms"]
 				else:
 					p_r = self.info[ip]["last_ms"]
 					self.info[ip]["render_ms"] = p_r
-						#GG XD sad samo color fading
 
 				p_angle = self.info[ip]["angle"]
 				p_x = p_r * cos(p_angle) + CIRCLE_CENTER[0]
 				p_y = p_r * sin(p_angle) + CIRCLE_CENTER[1]
 				c_angle = angle - self.info[ip]["angle"] #moze biti od 0 do 2
-				#da, uglavnom ako je c_angle == 0 onda color == 255
-				#c_angle == 2 onda color == 0
-				#ako je c_angle == 0.5 onda color == 255/2
 				c = 255-255*(c_angle/2)
 				color = (0,c,0)
 				pygame.draw.circle(win, color, (p_x, p_y), 5, 4)
