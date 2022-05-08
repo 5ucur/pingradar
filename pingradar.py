@@ -61,7 +61,7 @@ class PingManager:
 		for ip in copy(self.info):
 			if not "render" in self.info[ip]:
 				continue
-			if self.info[ip]["render"] is None:
+			if self.info[ip]["render"] is False:
 				continue
 
 			start = self.info[ip]["render"]
@@ -76,7 +76,7 @@ class PingManager:
 
 
 			if total >= render_time:
-				self.info[ip]["render"] = None
+				self.info[ip]["render"] = False
 				self.info[ip]["render_ms"] = None
 				continue
 
