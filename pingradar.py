@@ -8,6 +8,8 @@ import subprocess
 import math
 from math import cos, sin
 
+from copy import copy
+
 import pygame
 
 def ping(ip):
@@ -30,6 +32,7 @@ class PingManager:
 	def __init__(self, ips):
 		self.ips = ips
 		self.info = {}
+		self.rendercircles = {}
 
 		for i, ip in enumerate(self.ips):
 			angle = i*(628/len(self.ips))/100 + math.pi/6
@@ -46,34 +49,51 @@ class PingManager:
 		result = ping(ip)
 		self.info[ip]["last_ms"] = result
 
-	def drawIps(self, angle):
+	def decideIps(self):
 		for ip in self.info:
 			if self.info[ip]["last_ms"] > CIRCLE_R:
 				continue
-			if angle >= self.info[ip]["angle"] and \
-			angle < self.info[ip]["angle"] + 2:
-				if self.info[ip]["render_ms"]:
-					p_r = self.info[ip]["render_ms"]
-				else:
-					p_r = self.info[ip]["last_ms"]
-					self.info[ip]["render_ms"] = p_r
+			if angle >= self.info[ip]["angle"] and angle < self.info[ip]["angle"] + 0.2:
+				self.info[ip]["render"] = time.time()
 
-				p_angle = self.info[ip]["angle"]
-				p_x = p_r * cos(p_angle) + CIRCLE_CENTER[0]
-				p_y = p_r * sin(p_angle) + CIRCLE_CENTER[1]
-				c_angle = angle - self.info[ip]["angle"] #moze biti od 0 do 2
-				c = 255-255*(c_angle/2)
-				color = (0,c,0)
-				pygame.draw.circle(win, color, (p_x, p_y), 5, 4)
+	def renderIps(self):
+		render_time = 3 #secs
+		for ip in copy(self.info):
+			if not "render" in self.info[ip]:
+				continue
+			if self.info[ip]["render"] is None:
+				continue
 
-				txt = font1.render(
-					f"{ip} {self.info[ip]['render_ms']}ms",
-					True,
-					color
-				)
-				win.blit(txt, (p_x+5, p_y+5))
+			start = self.info[ip]["render"]
+			now = time.time()
+			total = now-start
+
+			if self.info[ip]["render_ms"]:
+				p_r = self.info[ip]["render_ms"]
 			else:
+				p_r = self.info[ip]["last_ms"]
+				self.info[ip]["render_ms"] = p_r
+
+
+			if total >= render_time:
+				self.info[ip]["render"] = None
 				self.info[ip]["render_ms"] = None
+				continue
+
+			p_angle = self.info[ip]["angle"]
+			p_x = p_r * cos(p_angle) + CIRCLE_CENTER[0]
+			p_y = p_r * sin(p_angle) + CIRCLE_CENTER[1]
+
+			c = max(0, 255-255*(total/render_time))
+			color = (0,c,0)
+			pygame.draw.circle(win, color, (p_x, p_y), 5, 4)
+
+			txt = font1.render(
+				f"{ip} {self.info[ip]['render_ms']}ms",
+				True,
+				color
+			)
+			win.blit(txt, (p_x+5, p_y+5))
 
 pygame.init()
 FPS = 60
@@ -112,15 +132,15 @@ while running:
 
 	ping_mngr_elapsed += d
 
-	if ping_mngr_elapsed > 500: # 0.5s
+	if ping_mngr_elapsed > 1000: # 0.5s
 		ping_manager.spawnThreads()
 		ping_mngr_elapsed = 0
 
 	if angle >= math.pi*2:
 		angle = 0
 
-	ping_manager.drawIps(angle)
-
+	ping_manager.decideIps()
+	ping_manager.renderIps()
 
 	pygame.draw.circle(win, (0,255,0), CIRCLE_CENTER, CIRCLE_R, 1)
 	pygame.draw.circle(win, (90,90,90), CIRCLE_CENTER, CIRCLE_R/3, 1)
