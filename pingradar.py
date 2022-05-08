@@ -32,7 +32,7 @@ class PingManager:
 		self.info = {}
 
 		for i, ip in enumerate(self.ips):
-			angle = i*(628/len(self.ips))/100 + math.pi/6
+			angle = i*(628/len(self.ips))/100 - math.pi/6
 			self.info[ip] = {}
 			self.info[ip]["angle"] = angle
 			self.info[ip]["last_ms"] = 0
@@ -72,9 +72,6 @@ class PingManager:
 				win.blit(txt, (p_x+5, p_y+5))
 			else:
 				self.info[ip]["render_ms"] = None
-
-#svake 3 sekunde napraviti len(ips) threadova
-#pa rezultat pisati u self.info[ip]["last_ms"]
 
 pygame.init()
 FPS = 60
@@ -121,6 +118,7 @@ while running:
 		angle = 0
 
 	ping_manager.drawIps(angle)
+
 
 	pygame.draw.circle(win, (0,255,0), CIRCLE_CENTER, CIRCLE_R, 1)
 	pygame.draw.circle(win, (90,90,90), CIRCLE_CENTER, CIRCLE_R/3, 1)
