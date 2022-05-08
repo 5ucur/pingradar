@@ -32,7 +32,7 @@ class PingManager:
 		self.info = {}
 
 		for i, ip in enumerate(self.ips):
-			angle = i*(628/len(self.ips))/100 - math.pi/6
+			angle = i*(628/len(self.ips))/100 + math.pi/6
 			self.info[ip] = {}
 			self.info[ip]["angle"] = angle
 			self.info[ip]["last_ms"] = 0
@@ -48,6 +48,8 @@ class PingManager:
 
 	def drawIps(self, angle):
 		for ip in self.info:
+			if self.info[ip]["last_ms"] > CIRCLE_R:
+				continue
 			if angle >= self.info[ip]["angle"] and \
 			angle < self.info[ip]["angle"] + 2:
 				if self.info[ip]["render_ms"]:
