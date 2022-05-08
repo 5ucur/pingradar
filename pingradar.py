@@ -32,11 +32,11 @@ class PingManager:
 		self.info = {}
 
 		for i, ip in enumerate(self.ips):
-			#angle = i*34.88/100
-			angle = i*(628/len(self.ips))/100
+			angle = i*(628/len(self.ips))/100 + math.pi/6
 			self.info[ip] = {}
 			self.info[ip]["angle"] = angle
 			self.info[ip]["last_ms"] = 0
+			self.info[ip]["render_ms"] = 0
 
 	def spawnThreads(self):
 		for ip in self.ips:
@@ -46,20 +46,36 @@ class PingManager:
 		result = ping(ip)
 		self.info[ip]["last_ms"] = result
 
-	def drawIps(self):
+	def drawIps(self, angle):
 		for ip in self.info:
-			angle = self.info[ip]["angle"]
-			p_r = self.info[ip]["last_ms"]
-			p_x = p_r * cos(angle) + CIRCLE_CENTER[0]
-			p_y = p_r * sin(angle) + CIRCLE_CENTER[1]
-			pygame.draw.circle(win, (0,255,0), (p_x, p_y), 5, 4)
+			if angle > self.info[ip]["angle"] and \
+			angle < self.info[ip]["angle"] + 2:
+				if self.info[ip]["render_ms"]:
+					p_r = self.info[ip]["render_ms"]
+				else:
+					p_r = self.info[ip]["last_ms"]
+					self.info[ip]["render_ms"] = p_r
+						#GG XD sad samo color fading
 
-			txt = font1.render(
-				f"{ip} {self.info[ip]['last_ms']}ms",
-				True,
-				(0,255,0)
-			)
-			win.blit(txt, (p_x+5, p_y+5))
+				p_angle = self.info[ip]["angle"]
+				p_x = p_r * cos(p_angle) + CIRCLE_CENTER[0]
+				p_y = p_r * sin(p_angle) + CIRCLE_CENTER[1]
+				c_angle = angle - self.info[ip]["angle"] #moze biti od 0 do 2
+				#da, uglavnom ako je c_angle == 0 onda color == 255
+				#c_angle == 2 onda color == 0
+				#ako je c_angle == 0.5 onda color == 255/2
+				c = 255-255*(c_angle/2)
+				color = (0,c,0)
+				pygame.draw.circle(win, color, (p_x, p_y), 5, 4)
+
+				txt = font1.render(
+					f"{ip} {self.info[ip]['render_ms']}ms",
+					True,
+					color
+				)
+				win.blit(txt, (p_x+5, p_y+5))
+			else:
+				self.info[ip]["render_ms"] = None
 
 #svake 3 sekunde napraviti len(ips) threadova
 #pa rezultat pisati u self.info[ip]["last_ms"]
@@ -83,12 +99,13 @@ CIRCLE_R = HALF_HEIGHT - 20 #radius
 CIRCLE_CENTER = (HALF_WIDTH, HALF_HEIGHT) #x,y
 
 angle = 0
-toAdd = math.pi*2/FPS / 3 #3 seconds
+toAdd = math.pi*2/FPS / 5 #5 seconds
 
 ips = sys.argv[1:]
 ping_manager = PingManager(ips)
 
 ping_mngr_elapsed = 2500
+revolutions = 0
 
 running = True
 while running:
@@ -100,11 +117,14 @@ while running:
 
 	ping_mngr_elapsed += d
 
-	if ping_mngr_elapsed > 3000: #3k ms == 3sec
+	if ping_mngr_elapsed > 500: # 0.5s
 		ping_manager.spawnThreads()
 		ping_mngr_elapsed = 0
 
-	ping_manager.drawIps()
+	if angle >= math.pi*2:
+		angle = 0
+
+	ping_manager.drawIps(angle)
 
 	pygame.draw.circle(win, (0,255,0), CIRCLE_CENTER, CIRCLE_R, 1)
 	pygame.draw.circle(win, (90,90,90), CIRCLE_CENTER, CIRCLE_R/3, 1)
@@ -113,7 +133,7 @@ while running:
 	p_r = CIRCLE_R
 	p_x = p_r * cos(angle) + CIRCLE_CENTER[0]
 	p_y = p_r * sin(angle) + CIRCLE_CENTER[1]
-	pygame.draw.line(win, (0,255,0), CIRCLE_CENTER, (p_x, p_y), 1)
+	pygame.draw.line(win, (0,255,0), CIRCLE_CENTER, (p_x, p_y), 1) #main lajna
 
 
 	pygame.draw.line(
