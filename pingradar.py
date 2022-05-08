@@ -35,6 +35,9 @@ pygame.init()
 FPS = 60
 clock = pygame.time.Clock()
 
+pygame.font.init()
+font1 = pygame.font.SysFont('Arial', 20)
+
 WIDTH = 640
 HEIGHT = 480
 HALF_WIDTH = WIDTH // 2
@@ -48,7 +51,7 @@ CIRCLE_CENTER = (HALF_WIDTH, HALF_HEIGHT) #x,y
 
 tick = 0
 angle = 0
-toAdd = math.pi/2 / FPS #3 seconds
+toAdd = math.pi*2/FPS / 3 #3 seconds
 
 running = True
 while running:
@@ -59,12 +62,10 @@ while running:
 			running = False
 
 	pygame.draw.circle(win, (0,255,0), CIRCLE_CENTER, CIRCLE_R, 1)
-	pygame.draw.circle(win, (0,255,0), CIRCLE_CENTER, 5, 5)
 
 	p_r = CIRCLE_R #test radius
 	p_x = p_r * cos(angle) + CIRCLE_CENTER[0]
 	p_y = p_r * sin(angle) + CIRCLE_CENTER[1]
-	#pygame.draw.circle(win, (255,0,0), (p_x, p_y), 5, 5)
 	pygame.draw.line(win, (0,255,0), CIRCLE_CENTER, (p_x, p_y), 1)
 
 	pygame.display.update()
