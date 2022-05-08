@@ -46,8 +46,12 @@ class PingManager:
 			threading.Thread(target=self.pingThread, args=(ip,)).start()
 
 	def pingThread(self, ip):
+		start = time.time()
 		result = ping(ip)
-		self.info[ip]["last_ms"] = result
+		end = time.time()
+		total = (end-start)
+		if total < REFRESH_SECS:
+			self.info[ip]["last_ms"] = result
 
 	def decideIps(self):
 		for ip in self.info:
@@ -113,6 +117,8 @@ pygame.display.set_caption("Ping Radar")
 CIRCLE_R = HALF_HEIGHT - 20 #radius
 CIRCLE_CENTER = (HALF_WIDTH, HALF_HEIGHT) #x,y
 
+REFRESH_SECS = 1
+
 angle = 0
 toAdd = math.pi*2/FPS / 5 #5 seconds
 
@@ -132,7 +138,7 @@ while running:
 
 	ping_mngr_elapsed += d
 
-	if ping_mngr_elapsed > 1000: # 0.5s
+	if ping_mngr_elapsed > REFRESH_SECS*1000: # 0.5s
 		ping_manager.spawnThreads()
 		ping_mngr_elapsed = 0
 
