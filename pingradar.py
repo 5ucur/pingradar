@@ -85,7 +85,14 @@ class PingManager:
 				continue
 
 			p_angle = self.info[ip]["angle"]
-			p_r *= 2
+			if self.info[ip]["render_ms"] >= 150:
+				p_r *= 1.25
+			elif 150 > self.info[ip]["render_ms"] >= 100:
+				p_r *= 1.5
+			elif 100 > self.info[ip]["render_ms"] >= 50:
+				p_r *= 1.75
+			else:
+				p_r *= 2
 			p_x = p_r * cos(p_angle) + CIRCLE_CENTER[0]
 			p_y = p_r * sin(p_angle) + CIRCLE_CENTER[1]
 
