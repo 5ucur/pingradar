@@ -85,6 +85,7 @@ class PingManager:
 				continue
 
 			p_angle = self.info[ip]["angle"]
+			p_r *= 2
 			p_x = p_r * cos(p_angle) + CIRCLE_CENTER[0]
 			p_y = p_r * sin(p_angle) + CIRCLE_CENTER[1]
 
